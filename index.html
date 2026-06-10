@@ -19,23 +19,23 @@
   --green:#22c55e;--red:#ef4444;--nav:64px;--head:56px
 }
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:var(--nav)}
-
+ 
 /* HEADER */
 .hdr{position:sticky;top:0;z-index:100;background:var(--primary);color:#fff;height:var(--head);display:flex;align-items:center;padding:0 16px;box-shadow:0 2px 8px rgba(0,0,0,.2)}
 .hdr h1{font-size:20px;font-weight:700;flex:1}
 .hdr-btn{background:none;border:none;color:#fff;cursor:pointer;padding:8px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background .2s}
 .hdr-btn:hover{background:rgba(255,255,255,.15)}
-
+ 
 /* BOTTOM NAV */
 .nav{position:fixed;bottom:0;left:0;right:0;height:var(--nav);background:#fff;border-top:1px solid var(--border);display:flex;z-index:100;box-shadow:0 -2px 8px rgba(0,0,0,.07)}
 .ni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;background:none;border:none;color:var(--muted);font-size:11px;font-weight:600;padding:8px 0;transition:color .2s}
 .ni.active{color:var(--primary)}
 .ni svg{width:22px;height:22px}
-
+ 
 /* VIEWS */
 .view{display:none;padding:16px}
 .view.active{display:block}
-
+ 
 /* SUMMARY */
 .sum{background:linear-gradient(135deg,var(--primary),#0f4fc0);color:#fff;border-radius:16px;padding:20px;margin-bottom:14px}
 .sum-title{font-size:12px;opacity:.75;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
@@ -45,13 +45,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .sum-item{background:rgba(255,255,255,.15);border-radius:10px;padding:10px 12px}
 .sum-lbl{font-size:11px;opacity:.8}
 .sum-val{font-size:20px;font-weight:700}
-
+ 
 /* FILTER */
 .filters{display:flex;gap:8px;margin-bottom:12px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
 .filters::-webkit-scrollbar{display:none}
 .fb{padding:6px 14px;border-radius:20px;border:1.5px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;color:var(--muted);transition:all .2s}
 .fb.active{border-color:var(--primary);color:var(--primary);background:#eff6ff}
-
+ 
 /* CARDS */
 .card{background:var(--card);border-radius:14px;padding:14px 16px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
 .ch{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
@@ -66,7 +66,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .ab{flex:1;padding:8px 6px;border-radius:8px;border:1px solid var(--border);background:var(--bg);cursor:pointer;font-size:12px;font-weight:600;color:var(--muted);display:flex;align-items:center;justify-content:center;gap:4px;transition:background .15s}
 .ab:hover{background:#fff}
 .ab.del{color:var(--red);border-color:#fee2e2}
-
+ 
 /* FORM */
 .card h2{font-size:15px;font-weight:700;margin-bottom:14px}
 .fg{margin-bottom:14px}
@@ -75,14 +75,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .inp:focus{border-color:var(--primary)}
 .irow{display:flex;gap:8px}
 .irow .inp{flex:1}
-
+ 
 /* AUTOCOMPLETE */
 .acw{position:relative}
 .acl{position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid var(--border);border-top:none;border-radius:0 0 10px 10px;z-index:200;max-height:180px;overflow-y:auto;box-shadow:0 6px 16px rgba(0,0,0,.1)}
 .aci{padding:10px 13px;cursor:pointer;font-size:13px;border-bottom:1px solid #f1f3f5;line-height:1.3}
 .aci:hover{background:var(--bg)}
 .aci:last-child{border-bottom:none}
-
+ 
 /* BUTTONS */
 .btn{width:100%;padding:13px;border-radius:11px;border:none;cursor:pointer;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s}
 .btn-p{background:var(--primary);color:#fff;margin-top:6px}
@@ -92,7 +92,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .btn-d{background:#fef2f2;color:var(--red);border:1.5px solid #fee2e2}
 .ico{background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s;flex-shrink:0}
 .ico:hover{background:#fff}
-
+ 
 /* TOGGLE */
 .tgl-row{display:flex;align-items:center;gap:12px;padding:10px 0}
 .tgl{position:relative;width:46px;height:25px;flex-shrink:0}
@@ -102,22 +102,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 input:checked+.tsl{background:var(--primary)}
 input:checked+.tsl:before{transform:translateX(21px)}
 .tgl-lbl{font-size:14px;font-weight:600}
-
+ 
 /* STATUS */
 .sts{padding:10px 13px;border-radius:10px;font-size:14px;font-weight:600;margin-top:6px}
 .sts-ok{background:#f0fdf4;color:#16a34a}
 .sts-err{background:#fef2f2;color:var(--red)}
 .sts-load{background:#eff6ff;color:var(--primary);display:flex;align-items:center;gap:8px}
-
+ 
 /* SPINNER */
 .spin{width:16px;height:16px;border:2px solid #bfdbfe;border-top-color:var(--primary);border-radius:50%;animation:sp .7s linear infinite;flex-shrink:0}
 @keyframes sp{to{transform:rotate(360deg)}}
-
+ 
 /* MAP MODAL */
 .mover{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:flex-end;justify-content:center}
 .mover.open{display:flex}
 .modal{background:#fff;width:100%;max-width:640px;border-radius:18px 18px 0 0;overflow:hidden;max-height:92vh;display:flex;flex-direction:column}
-
+ 
 /* DIALOG MODAL */
 .dlg-over{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:800;align-items:center;justify-content:center;padding:24px}
 .dlg-over.open{display:flex}
@@ -133,7 +133,7 @@ input:checked+.tsl:before{transform:translateX(21px)}
 .dlg-ok{background:var(--primary);color:#fff}
 .dlg-ok.danger{background:var(--red)}
 .dlg-cancel{background:var(--bg);color:var(--text);border:1.5px solid var(--border)!important}
-
+ 
 /* MAP BOTTOM BANNER */
 .map-banner{position:absolute;bottom:0;left:0;right:0;background:rgba(255,255,255,.96);backdrop-filter:blur(8px);border-top:1px solid var(--border);padding:12px 16px;display:flex;gap:0;z-index:50}
 .map-stat{flex:1;text-align:center;border-right:1px solid var(--border)}
@@ -145,19 +145,19 @@ input:checked+.tsl:before{transform:translateX(21px)}
 #map{height:320px;flex-shrink:0}
 .minfo{padding:12px 16px;font-size:13px;line-height:1.8;color:var(--muted)}
 .minfo strong{color:var(--text)}
-
+ 
 /* EMPTY */
 .empty{text-align:center;padding:48px 24px;color:var(--muted)}
 .empty svg{width:60px;height:60px;margin-bottom:14px;opacity:.25}
 .empty h3{font-size:17px;font-weight:700;margin-bottom:6px;color:var(--text)}
 .empty p{font-size:14px}
-
+ 
 /* DIVIDER */
 .div{height:1px;background:var(--border);margin:12px 0}
-
+ 
 /* SECTION TITLE */
 .sec{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:16px 0 6px}
-
+ 
 @media (min-width:600px){
   body{max-width:480px;margin:0 auto}
   .nav{max-width:480px;left:50%;transform:translateX(-50%)}
@@ -168,7 +168,7 @@ input:checked+.tsl:before{transform:translateX(21px)}
 </style>
 </head>
 <body>
-
+ 
 <div class="hdr">
   <h1 id="viewTitle">Matkat</h1>
   <button class="hdr-btn" id="exportBtn" title="Vie CSV" style="display:none">
@@ -177,7 +177,7 @@ input:checked+.tsl:before{transform:translateX(21px)}
     </svg>
   </button>
 </div>
-
+ 
 <!-- VIEW: MATKAT -->
 <div id="vTrips" class="view active">
   <!-- Install banner -->
@@ -224,7 +224,7 @@ input:checked+.tsl:before{transform:translateX(21px)}
   </div>
   <div id="tripList"></div>
 </div>
-
+ 
 <!-- VIEW: LISÄÄ -->
 <div id="vAdd" class="view">
   <div class="card">
@@ -316,7 +316,7 @@ input:checked+.tsl:before{transform:translateX(21px)}
     </button>
   </div>
 </div>
-
+ 
 <!-- VIEW: ASETUKSET -->
 <div id="vSettings" class="view">
   <div class="card">
@@ -338,7 +338,7 @@ input:checked+.tsl:before{transform:translateX(21px)}
     <div id="homeSaved" style="font-size:13px;color:var(--green);display:none;padding:6px 0">✓ Kotiosoite tallennettu</div>
     <button class="btn btn-p" id="saveHomeBtn">Tallenna kotiosoite</button>
   </div>
-
+ 
   <div class="card" style="margin-top:10px">
     <h2>💶 Kilometrikorvaus</h2>
     <p style="font-size:13px;color:var(--muted);margin:6px 0 12px">Veroton korvaus per kilometri. Suomessa tyypillisesti 0,26–0,30 €/km.</p>
@@ -348,7 +348,7 @@ input:checked+.tsl:before{transform:translateX(21px)}
     </div>
     <button class="btn btn-p" id="saveRateBtn">Tallenna</button>
   </div>
-
+ 
   <div class="card" style="margin-top:10px">
     <h2>📤 Vie tiedot</h2>
     <p style="font-size:13px;color:var(--muted);margin:6px 0 12px">Lataa kaikki matkat Excel-yhteensopivana CSV-tiedostona.</p>
@@ -362,14 +362,14 @@ input:checked+.tsl:before{transform:translateX(21px)}
       Lataa CSV (Excel)
     </button>
   </div>
-
+ 
   <div class="card" style="margin-top:10px">
     <h2>🗑️ Nollaa tiedot</h2>
     <p style="font-size:13px;color:var(--muted);margin:6px 0 12px">Poistaa kaikki tallennetut matkat. Kotiosoite ja asetukset säilyvät.</p>
     <button class="btn btn-d" id="clearBtn">Poista kaikki matkat</button>
   </div>
 </div>
-
+ 
 <!-- VIEW: KARTTA -->
 <div id="vMap" class="view" style="padding:0;position:relative">
   <div id="overviewMap" style="height:calc(100vh - 56px - 64px)"></div>
@@ -392,7 +392,7 @@ input:checked+.tsl:before{transform:translateX(21px)}
     </div>
   </div>
 </div>
-
+ 
 <!-- BOTTOM NAV -->
 <nav class="nav">
   <button class="ni active" data-v="vTrips">
@@ -428,7 +428,7 @@ input:checked+.tsl:before{transform:translateX(21px)}
     Asetukset
   </button>
 </nav>
-
+ 
 <!-- DIALOG MODAL -->
 <div class="dlg-over" id="dlgModal">
   <div class="dlg">
@@ -441,7 +441,7 @@ input:checked+.tsl:before{transform:translateX(21px)}
     </div>
   </div>
 </div>
-
+ 
 <!-- QUICK GPS MODAL -->
 <div class="mover" id="quickModal">
   <div class="modal" style="border-radius:18px 18px 0 0;padding:20px">
@@ -466,7 +466,7 @@ input:checked+.tsl:before{transform:translateX(21px)}
     </div>
   </div>
 </div>
-
+ 
 <!-- MAP MODAL -->
 <div class="mover" id="mapModal">
   <div class="modal">
@@ -489,7 +489,7 @@ input:checked+.tsl:before{transform:translateX(21px)}
     <div class="minfo" id="mapInfo"></div>
   </div>
 </div>
-
+ 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 // ── DIALOG SYSTEM ──────────────────────────────────────────
@@ -531,14 +531,14 @@ function showConfirm(msg, title='Vahvista', danger=false){
     };
   });
 }
-
+ 
 // ── STATE ──────────────────────────────────────────────────
 let D = JSON.parse(localStorage.getItem('mpk') || '{"trips":[],"home":null,"rate":0.26}');
 function save(){ localStorage.setItem('mpk', JSON.stringify(D)); }
-
+ 
 let mapInst = null;
 let cur = { from:null, to:null, dist:0, geom:null };
-
+ 
 // ── NAVIGATION ─────────────────────────────────────────────
 const vtitles = { vTrips:'Matkat', vAdd:'Lisää matka', vMap:'Kartta', vSettings:'Asetukset' };
 document.querySelectorAll('.ni').forEach(btn => {
@@ -555,7 +555,7 @@ function switchView(id){
   if(id === 'vAdd') initForm();
   if(id === 'vMap') renderOverviewMap();
 }
-
+ 
 // ── OVERVIEW MAP ───────────────────────────────────────────
 let ovMap = null, ovMarkers = [];
 function renderOverviewMap(){
@@ -569,7 +569,7 @@ function renderOverviewMap(){
   document.getElementById('mbEur').textContent = totalEur.toFixed(0)+' €';
   // Adjust map height so banner doesn't overlap
   document.getElementById('overviewMap').style.height = `calc(100vh - 56px - 64px - 64px)`;
-
+ 
   setTimeout(() => {
     if(!ovMap){
       ovMap = L.map('overviewMap').setView([64.5, 26], 5);
@@ -580,13 +580,13 @@ function renderOverviewMap(){
     // Clear old markers
     ovMarkers.forEach(m => ovMap.removeLayer(m));
     ovMarkers = [];
-
+ 
     const trips = D.trips.filter(t => t.toLat && t.toLng);
     if(!trips.length){
       ovMap.setView([64.5, 26], 5);
       return;
     }
-
+ 
     // Group by destination coords (cluster same place)
     const groups = {};
     trips.forEach(t => {
@@ -594,14 +594,14 @@ function renderOverviewMap(){
       if(!groups[key]) groups[key] = { lat:+t.toLat, lng:+t.toLng, addr:(t.toAddr||'').split(',')[0], trips:[] };
       groups[key].trips.push(t);
     });
-
+ 
     const bounds = [];
     Object.values(groups).forEach(g => {
       const count = g.trips.length;
       const totalKm = g.trips.reduce((s,t)=>s+t.dist,0);
       const dates = g.trips.map(t => fmtDate(t.date)).join('<br>');
       const color = count >= 5 ? '#dc2626' : count >= 3 ? '#f59e0b' : '#1a73e8';
-
+ 
       // Custom icon with visit count
       const icon = L.divIcon({
         className:'',
@@ -609,7 +609,7 @@ function renderOverviewMap(){
         iconSize:[count>1?34:28, count>1?34:28],
         iconAnchor:[count>1?17:14, count>1?34:28]
       });
-
+ 
       const marker = L.marker([g.lat, g.lng], {icon}).addTo(ovMap);
       marker.bindPopup(`
         <b>${g.addr}</b><br>
@@ -619,13 +619,13 @@ function renderOverviewMap(){
       ovMarkers.push(marker);
       bounds.push([g.lat, g.lng]);
     });
-
+ 
     if(bounds.length === 1) ovMap.setView(bounds[0], 12);
     else ovMap.fitBounds(bounds, { padding:[30,30] });
     ovMap.invalidateSize();
   }, 60);
 }
-
+ 
 // ── GEOCODING (Nominatim, Finland-biased) ──────────────────
 const gc = {};
 async function geocode(q){
@@ -638,7 +638,7 @@ async function geocode(q){
     return await r.json();
   } catch{ return []; }
 }
-
+ 
 function setupAC(inpId, listId, onSel){
   const inp = document.getElementById(inpId);
   const lst = document.getElementById(listId);
@@ -666,13 +666,13 @@ function setupAC(inpId, listId, onSel){
     if(!inp.contains(e.target) && !lst.contains(e.target)) lst.style.display = 'none';
   });
 }
-
+ 
 // ── GPS ────────────────────────────────────────────────────
 function gpsError(err){
   let msg = 'GPS-sijaintia ei saatu.';
   const isFile = location.protocol === 'file:';
   const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
-
+ 
   if(err && err.code === 1){
     if(isFile && isMobile){
       msg = 'Mobiili Chrome estää sijainnin tiedostoista.\n\nRatkaisu: laita sovellus ilmaiseksi nettiin:\n1. Mene selaimella: netlify.com/drop\n2. Vedä matkapaivakirja.html sivulle\n3. Saat oman https-osoitteen → sijainti toimii';
@@ -688,7 +688,7 @@ function gpsError(err){
   }
   showAlert(msg, 'GPS-virhe', 'err');
 }
-
+ 
 function getGPS(cb){
   if(!navigator.geolocation){ showAlert('GPS ei ole tuettu tässä selaimessa.','GPS','err'); return; }
   navigator.geolocation.getCurrentPosition(async pos => {
@@ -700,7 +700,7 @@ function getGPS(cb){
     } catch{ cb({ lat, lng, addr:`${lat.toFixed(5)}, ${lng.toFixed(5)}` }); }
   }, gpsError, { timeout:10000, maximumAge:60000 });
 }
-
+ 
 // ── ROUTING (OSRM) ─────────────────────────────────────────
 async function calcRoute(from, to){
   const url = `https://router.project-osrm.org/route/v1/driving/${from.lng},${from.lat};${to.lng},${to.lat}?overview=full&geometries=geojson`;
@@ -714,7 +714,7 @@ async function calcRoute(from, to){
     geom: rt.geometry.coordinates.map(c => [c[1],c[0]])
   };
 }
-
+ 
 // ── ADD FORM ───────────────────────────────────────────────
 function calcWorkHours(){
   const s = document.getElementById('workStart').value;
@@ -727,7 +727,7 @@ function calcWorkHours(){
     document.getElementById('workHours').value = (mins/60).toFixed(1).replace(/\.0$/,'');
   }
 }
-
+ 
 function initForm(){
   document.getElementById('tripDate').value = new Date().toISOString().split('T')[0];
   cur = { from:D.home||null, to:null, dist:0, geom:null };
@@ -743,11 +743,11 @@ function initForm(){
 }
 document.getElementById('workStart').addEventListener('change', calcWorkHours);
 document.getElementById('workEnd').addEventListener('change', calcWorkHours);
-
+ 
 setupAC('fromAddr','fromList', loc => { cur.from = loc; });
 setupAC('toAddr',  'toList',  loc => { cur.to   = loc; });
 setupAC('homeAddr','homeList', loc => { D.home = { ...loc }; });
-
+ 
 document.getElementById('fromHomeBtn').onclick = () => {
   if(!D.home){ showAlert('Aseta kotiosoite ensin asetuksista.','Ei kotiosoitetta','warn'); return; }
   document.getElementById('fromAddr').value = D.home.addr;
@@ -761,7 +761,7 @@ document.getElementById('toGps').onclick = () => getGPS(l => {
   document.getElementById('toAddr').value = l.addr;
   cur.to = l;
 });
-
+ 
 document.getElementById('calcBtn').onclick = async () => {
   // Try geocode if we still don't have coords
   const ft = document.getElementById('fromAddr').value.trim();
@@ -775,7 +775,7 @@ document.getElementById('calcBtn').onclick = async () => {
     if(r.length) cur.to = { lat:+r[0].lat, lng:+r[0].lon, addr:r[0].display_name };
   }
   if(!cur.from || !cur.to){ showAlert('Syötä sekä lähtöpaikka että kohde.','Puuttuvat tiedot'); return; }
-
+ 
   const btn = document.getElementById('calcBtn');
   btn.innerHTML = '<div class="spin"></div> Lasketaan...';
   btn.disabled = true;
@@ -790,14 +790,14 @@ document.getElementById('calcBtn').onclick = async () => {
   btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="17" height="17"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg> Laske reitti`;
   btn.disabled = false;
 };
-
+ 
 function sts(type, msg){
   const el = document.getElementById('calcStatus');
   el.className = `sts sts-${type}`;
   el.textContent = msg;
   el.style.display = 'block';
 }
-
+ 
 document.getElementById('saveBtn').onclick = () => {
   const ft = document.getElementById('fromAddr').value.trim();
   const tt = document.getElementById('toAddr').value.trim();
@@ -820,7 +820,7 @@ document.getElementById('saveBtn').onclick = () => {
   save();
   switchView('vTrips');
 };
-
+ 
 // ── SETTINGS ───────────────────────────────────────────────
 document.getElementById('homeGpsBtn').onclick = () => getGPS(l => {
   document.getElementById('homeAddr').value = l.addr;
@@ -851,7 +851,7 @@ document.getElementById('clearBtn').onclick = async () => {
   if(!ok) return;
   D.trips = []; save(); renderTrips();
 };
-
+ 
 // ── TRIP LIST ──────────────────────────────────────────────
 let period = 'all';
 document.querySelectorAll('.fb').forEach(b => {
@@ -862,7 +862,7 @@ document.querySelectorAll('.fb').forEach(b => {
     renderTrips();
   };
 });
-
+ 
 function inPeriod(trip){
   const d = new Date(trip.date+'T12:00'), now = new Date();
   if(period==='week'){ const w=new Date(now); w.setDate(now.getDate()-7); return d>=w; }
@@ -870,11 +870,11 @@ function inPeriod(trip){
   if(period==='year') return d.getFullYear()===now.getFullYear();
   return true;
 }
-
+ 
 function fmtDate(s){
   return new Date(s+'T12:00').toLocaleDateString('fi-FI',{day:'numeric',month:'short',year:'numeric'});
 }
-
+ 
 function renderTrips(){
   const list = document.getElementById('tripList');
   const trips = D.trips.filter(inPeriod).sort((a,b) => b.date.localeCompare(a.date));
@@ -886,7 +886,7 @@ function renderTrips(){
     const d=new Date(t.date+'T12:00');
     return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear();
   }).reduce((s,t) => s+t.dist, 0);
-
+ 
   const totalHours = trips.reduce((s,t)=>s+(t.hours||0),0);
   const monthHours = D.trips.filter(t=>{const d=new Date(t.date+'T12:00');return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();}).reduce((s,t)=>s+(t.hours||0),0);
   document.getElementById('totalKm').textContent = totalKm.toFixed(1)+' km';
@@ -895,7 +895,7 @@ function renderTrips(){
   document.getElementById('monthKm').textContent = mkm.toFixed(1)+' km';
   document.getElementById('totalHours').textContent = totalHours % 1 === 0 ? totalHours+' h' : totalHours.toFixed(1)+' h';
   document.getElementById('monthHours').textContent = monthHours % 1 === 0 ? monthHours+' h' : monthHours.toFixed(1)+' h';
-
+ 
   if(!trips.length){
     list.innerHTML = `<div class="empty">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -907,7 +907,7 @@ function renderTrips(){
     </div>`;
     return;
   }
-
+ 
   list.innerHTML = trips.map(t => {
     const fr = (t.fromAddr||'').split(',')[0];
     const to = (t.toAddr||'').split(',')[0];
@@ -941,35 +941,35 @@ function renderTrips(){
       </div>
     </div>`;
   }).join('');
-
+ 
   list.querySelectorAll('.map-btn').forEach(b => b.onclick = () => openMap(b.dataset.id));
   list.querySelectorAll('.del-btn').forEach(b => b.onclick = () => delTrip(b.dataset.id));
 }
-
+ 
 async function delTrip(id){
   const ok = await showConfirm('Poistetaanko tämä matka?','Poista matka',true);
   if(!ok) return;
   D.trips = D.trips.filter(t => t.id !== id);
   save(); renderTrips();
 }
-
+ 
 // ── MAP ────────────────────────────────────────────────────
 document.getElementById('closeMap').onclick = () => document.getElementById('mapModal').classList.remove('open');
 document.getElementById('mapModal').onclick = e => {
   if(e.target === document.getElementById('mapModal')) document.getElementById('mapModal').classList.remove('open');
 };
-
+ 
 async function openMap(id){
   const t = D.trips.find(x => x.id === id);
   if(!t) return;
   document.getElementById('mapModal').classList.add('open');
   document.getElementById('mapTitle').textContent = `${(t.fromAddr||'').split(',')[0]} → ${(t.toAddr||'').split(',')[0]}`;
-
+ 
   if(t.fromLat && t.toLat){
     document.getElementById('gmLink').href =
       `https://www.google.com/maps/dir/${t.fromLat},${t.fromLng}/${t.toLat},${t.toLng}`;
   }
-
+ 
   const rate = D.rate || 0.26;
   document.getElementById('mapInfo').innerHTML = `
     <strong>${t.dist.toFixed(1)} km</strong> ${t.rt?'(edestakainen)':''} &nbsp;·&nbsp;
@@ -977,7 +977,7 @@ async function openMap(id){
     💶 ${(t.dist*rate).toFixed(2).replace('.',',')} €
     ${t.notes ? `<br>📝 ${t.notes}` : ''}
   `;
-
+ 
   await new Promise(r => setTimeout(r, 60));
   if(!mapInst){
     mapInst = L.map('map', { zoomControl:true });
@@ -987,12 +987,12 @@ async function openMap(id){
   } else {
     mapInst.eachLayer(l => { if(l instanceof L.Marker || l instanceof L.Polyline) mapInst.removeLayer(l); });
   }
-
+ 
   if(t.fromLat && t.toLat){
     const fm = [t.fromLat, t.fromLng], tm = [t.toLat, t.toLng];
     L.marker(fm).addTo(mapInst).bindPopup((t.fromAddr||'').split(',')[0]);
     L.marker(tm).addTo(mapInst).bindPopup((t.toAddr||'').split(',')[0]).openPopup();
-
+ 
     if(t.geom && t.geom.length){
       const poly = L.polyline(t.geom, { color:'#1a73e8', weight:4, opacity:.85 }).addTo(mapInst);
       mapInst.fitBounds(poly.getBounds(), { padding:[20,20] });
@@ -1008,7 +1008,7 @@ async function openMap(id){
     mapInst.invalidateSize();
   }
 }
-
+ 
 // ── EXPORT ─────────────────────────────────────────────────
 function exportCSV(){
   const rate = D.rate || 0.26;
@@ -1026,7 +1026,7 @@ function exportCSV(){
   a.download = `matkat_${new Date().toISOString().split('T')[0]}.csv`;
   a.click();
 }
-
+ 
 // ── PWA INSTALL ────────────────────────────────────────────
 let deferredPrompt = null;
 window.addEventListener('beforeinstallprompt', e => {
@@ -1047,7 +1047,7 @@ document.getElementById('dismissInstall').onclick = () => {
 window.addEventListener('appinstalled', () => {
   document.getElementById('installBanner').style.display = 'none';
 });
-
+ 
 // ── QUICK GPS ADD ──────────────────────────────────────────
 let qLoc = null;
 document.getElementById('quickGpsBtn').onclick = () => {
@@ -1096,14 +1096,14 @@ document.getElementById('qSave').onclick = async () => {
   btn.textContent = 'Tallenna';
   btn.disabled = false;
 };
-
+ 
 // ── SERVICE WORKER ─────────────────────────────────────────
 if('serviceWorker' in navigator){
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js').catch(() => {});
   });
 }
-
+ 
 // ── INIT ───────────────────────────────────────────────────
 (function(){
   if(D.home) document.getElementById('homeAddr').value = D.home.addr || '';
