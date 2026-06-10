@@ -1,4 +1,4 @@
-const CACHE = 'matkakirja-v1';
+const CACHE = 'matkakirja-v2';
 const SHELL = ['./', './manifest.json', './icon.svg'];
 
 self.addEventListener('install', e => {
