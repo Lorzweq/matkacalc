@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Matkapäiväkirja</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --primary:#1a73e8;--primary-dark:#1557b0;--bg:#f0f4ff;
+  --card:#fff;--text:#1a1a2e;--muted:#6b7280;--border:#e0e6ef;
+  --green:#22c55e;--red:#ef4444;--nav:64px;--head:56px
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:var(--nav)}
+
+/* HEADER */
+.hdr{position:sticky;top:0;z-index:100;background:var(--primary);color:#fff;height:var(--head);display:flex;align-items:center;padding:0 16px;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.hdr h1{font-size:20px;font-weight:700;flex:1}
+.hdr-btn{background:none;border:none;color:#fff;cursor:pointer;padding:8px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background .2s}
+.hdr-btn:hover{background:rgba(255,255,255,.15)}
+
+/* BOTTOM NAV */
+.nav{position:fixed;bottom:0;left:0;right:0;height:var(--nav);background:#fff;border-top:1px solid var(--border);display:flex;z-index:100;box-shadow:0 -2px 8px rgba(0,0,0,.07)}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;background:none;border:none;color:var(--muted);font-size:11px;font-weight:600;padding:8px 0;transition:color .2s}
+.ni.active{color:var(--primary)}
+.ni svg{width:22px;height:22px}
+
+/* VIEWS */
+.view{display:none;padding:16px}
+.view.active{display:block}
+
+/* SUMMARY */
+.sum{background:linear-gradient(135deg,var(--primary),#0f4fc0);color:#fff;border-radius:16px;padding:20px;margin-bottom:14px}
+.sum-title{font-size:12px;opacity:.75;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.sum-km{font-size:40px;font-weight:800;line-height:1}
+.sum-sub{font-size:13px;opacity:.75;margin-top:4px}
+.sum-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+.sum-item{background:rgba(255,255,255,.15);border-radius:10px;padding:10px 12px}
+.sum-lbl{font-size:11px;opacity:.8}
+.sum-val{font-size:20px;font-weight:700}
+
+/* FILTER */
+.filters{display:flex;gap:8px;margin-bottom:12px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.filters::-webkit-scrollbar{display:none}
+.fb{padding:6px 14px;border-radius:20px;border:1.5px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;color:var(--muted);transition:all .2s}
+.fb.active{border-color:var(--primary);color:var(--primary);background:#eff6ff}
+
+/* CARDS */
+.card{background:var(--card);border-radius:14px;padding:14px 16px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.ch{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.td{font-size:12px;color:var(--muted)}
+.rt{font-size:15px;font-weight:600;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rt .arr{color:var(--primary);margin:0 5px}
+.kms{font-size:14px;font-weight:700;color:var(--green)}
+.eur{font-size:13px;color:var(--muted)}
+.nt{font-size:12px;color:var(--muted);margin-top:3px}
+.bdg{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;background:#dbeafe;color:var(--primary)}
+.acts{display:flex;gap:6px;margin-top:10px}
+.ab{flex:1;padding:8px 6px;border-radius:8px;border:1px solid var(--border);background:var(--bg);cursor:pointer;font-size:12px;font-weight:600;color:var(--muted);display:flex;align-items:center;justify-content:center;gap:4px;transition:background .15s}
+.ab:hover{background:#fff}
+.ab.del{color:var(--red);border-color:#fee2e2}
+
+/* FORM */
+.card h2{font-size:15px;font-weight:700;margin-bottom:14px}
+.fg{margin-bottom:14px}
+.lbl{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:5px;display:block;text-transform:uppercase;letter-spacing:.3px}
+.inp{width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;background:#fff;color:var(--text);outline:none;transition:border-color .2s}
+.inp:focus{border-color:var(--primary)}
+.irow{display:flex;gap:8px}
+.irow .inp{flex:1}
+
+/* AUTOCOMPLETE */
+.acw{position:relative}
+.acl{position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid var(--border);border-top:none;border-radius:0 0 10px 10px;z-index:200;max-height:180px;overflow-y:auto;box-shadow:0 6px 16px rgba(0,0,0,.1)}
+.aci{padding:10px 13px;cursor:pointer;font-size:13px;border-bottom:1px solid #f1f3f5;line-height:1.3}
+.aci:hover{background:var(--bg)}
+.aci:last-child{border-bottom:none}
+
+/* BUTTONS */
+.btn{width:100%;padding:13px;border-radius:11px;border:none;cursor:pointer;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s}
+.btn-p{background:var(--primary);color:#fff;margin-top:6px}
+.btn-p:hover{background:var(--primary-dark)}
+.btn-s{background:var(--bg);color:var(--text);border:1.5px solid var(--border);margin-bottom:8px}
+.btn-s:hover{background:#fff}
+.btn-d{background:#fef2f2;color:var(--red);border:1.5px solid #fee2e2}
+.ico{background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s;flex-shrink:0}
+.ico:hover{background:#fff}
+
+/* TOGGLE */
+.tgl-row{display:flex;align-items:center;gap:12px;padding:10px 0}
+.tgl{position:relative;width:46px;height:25px;flex-shrink:0}
+.tgl input{opacity:0;width:0;height:0}
+.tsl{position:absolute;cursor:pointer;inset:0;background:#d1d5db;border-radius:25px;transition:.3s}
+.tsl:before{content:'';position:absolute;width:19px;height:19px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+input:checked+.tsl{background:var(--primary)}
+input:checked+.tsl:before{transform:translateX(21px)}
+.tgl-lbl{font-size:14px;font-weight:600}
+
+/* STATUS */
+.sts{padding:10px 13px;border-radius:10px;font-size:14px;font-weight:600;margin-top:6px}
+.sts-ok{background:#f0fdf4;color:#16a34a}
+.sts-err{background:#fef2f2;color:var(--red)}
+.sts-load{background:#eff6ff;color:var(--primary);display:flex;align-items:center;gap:8px}
+
+/* SPINNER */
+.spin{width:16px;height:16px;border:2px solid #bfdbfe;border-top-color:var(--primary);border-radius:50%;animation:sp .7s linear infinite;flex-shrink:0}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* MAP MODAL */
+.mover{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:flex-end;justify-content:center}
+.mover.open{display:flex}
+.modal{background:#fff;width:100%;max-width:640px;border-radius:18px 18px 0 0;overflow:hidden;max-height:92vh;display:flex;flex-direction:column}
+.mhdr{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.mhdr h2{font-size:15px;font-weight:700;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#map{height:320px;flex-shrink:0}
+.minfo{padding:12px 16px;font-size:13px;line-height:1.8;color:var(--muted)}
+.minfo strong{color:var(--text)}
+
+/* EMPTY */
+.empty{text-align:center;padding:48px 24px;color:var(--muted)}
+.empty svg{width:60px;height:60px;margin-bottom:14px;opacity:.25}
+.empty h3{font-size:17px;font-weight:700;margin-bottom:6px;color:var(--text)}
+.empty p{font-size:14px}
+
+/* DIVIDER */
+.div{height:1px;background:var(--border);margin:12px 0}
+
+/* SECTION TITLE */
+.sec{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:16px 0 6px}
+
+@media (min-width:600px){
+  body{max-width:480px;margin:0 auto}
+  .nav{max-width:480px;left:50%;transform:translateX(-50%)}
+  .hdr{max-width:480px;left:50%;transform:translateX(-50%);position:sticky}
+  .mover{align-items:center}
+  .modal{border-radius:18px;max-height:85vh;margin:auto}
+}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <h1 id="viewTitle">Matkat</h1>
+  <button class="hdr-btn" id="exportBtn" title="Vie CSV" style="display:none">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="20" height="20">
+      <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+    </svg>
+  </button>
+</div>
+
+<!-- VIEW: MATKAT -->
+<div id="vTrips" class="view active">
+  <div class="sum">
+    <div class="sum-title">Kilometrit yhteensä</div>
+    <div class="sum-km" id="totalKm">0 km</div>
+    <div class="sum-sub" id="tripCount">0 matkaa</div>
+    <div class="sum-grid">
+      <div class="sum-item">
+        <div class="sum-lbl">Korvaus (€)</div>
+        <div class="sum-val" id="totalEur">0,00 €</div>
+      </div>
+      <div class="sum-item">
+        <div class="sum-lbl">Tämä kuukausi</div>
+        <div class="sum-val" id="monthKm">0 km</div>
+      </div>
+    </div>
+  </div>
+  <div class="filters">
+    <button class="fb active" data-p="all">Kaikki</button>
+    <button class="fb" data-p="year">Tämä vuosi</button>
+    <button class="fb" data-p="month">Tämä kuukausi</button>
+    <button class="fb" data-p="week">Tämä viikko</button>
+  </div>
+  <div id="tripList"></div>
+</div>
+
+<!-- VIEW: LISÄÄ -->
+<div id="vAdd" class="view">
+  <div class="card">
+    <div class="fg">
+      <label class="lbl">Päivämäärä</label>
+      <input type="date" class="inp" id="tripDate">
+    </div>
+    <div class="fg">
+      <label class="lbl">Lähtöpaikka</label>
+      <div class="irow">
+        <div class="acw" style="flex:1">
+          <input type="text" class="inp" id="fromAddr" placeholder="Osoite tai paikka">
+          <div class="acl" id="fromList" style="display:none"></div>
+        </div>
+        <button class="ico" id="fromHomeBtn" title="Kotiosoite">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="19" height="19">
+            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+        </button>
+        <button class="ico" id="fromGps" title="GPS">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="19" height="19">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M12 2v2M12 20v2M2 12h2M20 12h2"/>
+            <circle cx="12" cy="12" r="8" stroke-opacity=".25"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div class="fg">
+      <label class="lbl">Kohde (työkohde)</label>
+      <div class="irow">
+        <div class="acw" style="flex:1">
+          <input type="text" class="inp" id="toAddr" placeholder="Työkohteen osoite">
+          <div class="acl" id="toList" style="display:none"></div>
+        </div>
+        <button class="ico" id="toGps" title="GPS">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="19" height="19">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M12 2v2M12 20v2M2 12h2M20 12h2"/>
+            <circle cx="12" cy="12" r="8" stroke-opacity=".25"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div class="tgl-row">
+      <label class="tgl">
+        <input type="checkbox" id="roundTrip">
+        <span class="tsl"></span>
+      </label>
+      <span class="tgl-lbl">Edestakainen matka (km × 2)</span>
+    </div>
+    <div class="fg">
+      <label class="lbl">Muistiinpanot</label>
+      <input type="text" class="inp" id="tripNotes" placeholder="Projekti, asiakas tms.">
+    </div>
+    <button class="btn btn-s" id="calcBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="17" height="17">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/>
+      </svg>
+      Laske reitti
+    </button>
+    <div id="calcStatus" style="display:none"></div>
+    <button class="btn btn-p" id="saveBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="17" height="17">
+        <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
+        <polyline points="17 21 17 13 7 13 7 21"/>
+        <polyline points="7 3 7 8 15 8"/>
+      </svg>
+      Tallenna matka
+    </button>
+  </div>
+</div>
+
+<!-- VIEW: ASETUKSET -->
+<div id="vSettings" class="view">
+  <div class="card">
+    <h2>🏠 Kotiosoite / lähtöpiste</h2>
+    <div class="fg">
+      <label class="lbl">Osoite</label>
+      <div class="acw">
+        <input type="text" class="inp" id="homeAddr" placeholder="Esim. Mannerheimintie 1, Helsinki">
+        <div class="acl" id="homeList" style="display:none"></div>
+      </div>
+    </div>
+    <button class="ico" id="homeGpsBtn" style="width:auto;padding:9px 14px;gap:8px;font-size:13px;font-weight:600;margin-bottom:10px">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="17" height="17">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M12 2v2M12 20v2M2 12h2M20 12h2"/>
+      </svg>
+      Käytä nykyistä sijaintia
+    </button>
+    <div id="homeSaved" style="font-size:13px;color:var(--green);display:none;padding:6px 0">✓ Kotiosoite tallennettu</div>
+    <button class="btn btn-p" id="saveHomeBtn">Tallenna kotiosoite</button>
+  </div>
+
+  <div class="card" style="margin-top:10px">
+    <h2>💶 Kilometrikorvaus</h2>
+    <p style="font-size:13px;color:var(--muted);margin:6px 0 12px">Veroton korvaus per kilometri. Suomessa tyypillisesti 0,26–0,30 €/km.</p>
+    <div class="fg">
+      <label class="lbl">€ / km</label>
+      <input type="number" class="inp" id="rateInp" step="0.01" min="0.01" placeholder="0.26">
+    </div>
+    <button class="btn btn-p" id="saveRateBtn">Tallenna</button>
+  </div>
+
+  <div class="card" style="margin-top:10px">
+    <h2>📤 Vie tiedot</h2>
+    <p style="font-size:13px;color:var(--muted);margin:6px 0 12px">Lataa kaikki matkat Excel-yhteensopivana CSV-tiedostona.</p>
+    <button class="btn btn-s" id="csvBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="17" height="17">
+        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+        <line x1="16" y1="13" x2="8" y2="13"/>
+        <line x1="16" y1="17" x2="8" y2="17"/>
+      </svg>
+      Lataa CSV (Excel)
+    </button>
+  </div>
+
+  <div class="card" style="margin-top:10px">
+    <h2>🗑️ Nollaa tiedot</h2>
+    <p style="font-size:13px;color:var(--muted);margin:6px 0 12px">Poistaa kaikki tallennetut matkat. Kotiosoite ja asetukset säilyvät.</p>
+    <button class="btn btn-d" id="clearBtn">Poista kaikki matkat</button>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="nav">
+  <button class="ni active" data-v="vTrips">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <rect x="3" y="3" width="7" height="7" rx="1"/>
+      <rect x="14" y="3" width="7" height="7" rx="1"/>
+      <rect x="3" y="14" width="7" height="7" rx="1"/>
+      <rect x="14" y="14" width="7" height="7" rx="1"/>
+    </svg>
+    Matkat
+  </button>
+  <button class="ni" data-v="vAdd">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="12" y1="8" x2="12" y2="16"/>
+      <line x1="8" y1="12" x2="16" y2="12"/>
+    </svg>
+    Lisää
+  </button>
+  <button class="ni" data-v="vSettings">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+    </svg>
+    Asetukset
+  </button>
+</nav>
+
+<!-- MAP MODAL -->
+<div class="mover" id="mapModal">
+  <div class="modal">
+    <div class="mhdr">
+      <button class="ico" id="closeMap" style="padding:6px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="18" height="18">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+      <h2 id="mapTitle">Reitti</h2>
+      <a id="gmLink" href="#" target="_blank" class="ico" style="padding:6px;text-decoration:none" title="Avaa Google Mapsissa">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
+          <circle cx="12" cy="10" r="3"/>
+        </svg>
+      </a>
+    </div>
+    <div id="map"></div>
+    <div class="minfo" id="mapInfo"></div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// ── STATE ──────────────────────────────────────────────────
+let D = JSON.parse(localStorage.getItem('mpk') || '{"trips":[],"home":null,"rate":0.26}');
+function save(){ localStorage.setItem('mpk', JSON.stringify(D)); }
+
+let mapInst = null;
+let cur = { from:null, to:null, dist:0, geom:null };
+
+// ── NAVIGATION ─────────────────────────────────────────────
+const vtitles = { vTrips:'Matkat', vAdd:'Lisää matka', vSettings:'Asetukset' };
+document.querySelectorAll('.ni').forEach(btn => {
+  btn.addEventListener('click', () => switchView(btn.dataset.v));
+});
+function switchView(id){
+  ['vTrips','vAdd','vSettings'].forEach(v => {
+    document.getElementById(v).classList.toggle('active', v === id);
+  });
+  document.querySelectorAll('.ni').forEach(b => b.classList.toggle('active', b.dataset.v === id));
+  document.getElementById('viewTitle').textContent = vtitles[id];
+  document.getElementById('exportBtn').style.display = id === 'vTrips' ? 'flex' : 'none';
+  if(id === 'vTrips') renderTrips();
+  if(id === 'vAdd') initForm();
+}
+
+// ── GEOCODING (Nominatim, Finland-biased) ──────────────────
+const gc = {};
+async function geocode(q){
+  if(!q || q.length < 3) return [];
+  try{
+    const r = await fetch(
+      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=5&countrycodes=fi`,
+      { headers:{ 'Accept-Language':'fi' } }
+    );
+    return await r.json();
+  } catch{ return []; }
+}
+
+function setupAC(inpId, listId, onSel){
+  const inp = document.getElementById(inpId);
+  const lst = document.getElementById(listId);
+  inp.addEventListener('input', () => {
+    clearTimeout(gc[inpId]);
+    gc[inpId] = setTimeout(async () => {
+      const res = await geocode(inp.value);
+      lst.innerHTML = '';
+      if(!res.length){ lst.style.display='none'; return; }
+      res.forEach(r => {
+        const el = document.createElement('div');
+        el.className = 'aci';
+        el.textContent = r.display_name;
+        el.onclick = () => {
+          inp.value = r.display_name;
+          lst.style.display = 'none';
+          onSel({ lat:+r.lat, lng:+r.lon, addr:r.display_name });
+        };
+        lst.appendChild(el);
+      });
+      lst.style.display = 'block';
+    }, 380);
+  });
+  document.addEventListener('click', e => {
+    if(!inp.contains(e.target) && !lst.contains(e.target)) lst.style.display = 'none';
+  });
+}
+
+// ── GPS ────────────────────────────────────────────────────
+function gpsError(err){
+  let msg = 'GPS-sijaintia ei saatu.';
+  const isFile = location.protocol === 'file:';
+  const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
+
+  if(err && err.code === 1){
+    if(isFile && isMobile){
+      msg = 'Mobiili Chrome estää sijainnin tiedostoista.\n\nRatkaisu: laita sovellus ilmaiseksi nettiin:\n1. Mene selaimella: netlify.com/drop\n2. Vedä matkapaivakirja.html sivulle\n3. Saat oman https-osoitteen → sijainti toimii';
+    } else if(isFile){
+      msg = 'Chrome esti sijaintiluvat tiedostolta.\n\nKokeile:\n• Avaa Edge-selaimella (sallii file://)\n• Tai laita netisse: netlify.com/drop';
+    } else {
+      msg = 'Sijaintilupa evätty.\n\nSalli sijainti osoitepalkin lukkokuvakkeesta.';
+    }
+  } else if(err && err.code === 2){
+    msg = 'Sijaintia ei saatu. Tarkista GPS/verkko ja yritä uudelleen.';
+  } else if(err && err.code === 3){
+    msg = 'Sijainnin haku aikakatkaistiin. Yritä uudelleen.';
+  }
+  alert(msg);
+}
+
+function getGPS(cb){
+  if(!navigator.geolocation){ alert('GPS ei ole tuettu tässä selaimessa.'); return; }
+  navigator.geolocation.getCurrentPosition(async pos => {
+    const { latitude:lat, longitude:lng } = pos.coords;
+    try{
+      const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
+      const d = await r.json();
+      cb({ lat, lng, addr: d.display_name });
+    } catch{ cb({ lat, lng, addr:`${lat.toFixed(5)}, ${lng.toFixed(5)}` }); }
+  }, gpsError, { timeout:10000, maximumAge:60000 });
+}
+
+// ── ROUTING (OSRM) ─────────────────────────────────────────
+async function calcRoute(from, to){
+  const url = `https://router.project-osrm.org/route/v1/driving/${from.lng},${from.lat};${to.lng},${to.lat}?overview=full&geometries=geojson`;
+  const r = await fetch(url);
+  const d = await r.json();
+  if(d.code !== 'Ok') throw new Error('Reitti ei löydy');
+  const rt = d.routes[0];
+  return {
+    dist: rt.distance / 1000,
+    dur: Math.round(rt.duration / 60),
+    geom: rt.geometry.coordinates.map(c => [c[1],c[0]])
+  };
+}
+
+// ── ADD FORM ───────────────────────────────────────────────
+function initForm(){
+  document.getElementById('tripDate').value = new Date().toISOString().split('T')[0];
+  cur = { from:D.home||null, to:null, dist:0, geom:null };
+  document.getElementById('calcStatus').style.display = 'none';
+  document.getElementById('toAddr').value = '';
+  document.getElementById('tripNotes').value = '';
+  document.getElementById('roundTrip').checked = false;
+  if(D.home) document.getElementById('fromAddr').value = D.home.addr;
+  else document.getElementById('fromAddr').value = '';
+}
+
+setupAC('fromAddr','fromList', loc => { cur.from = loc; });
+setupAC('toAddr',  'toList',  loc => { cur.to   = loc; });
+setupAC('homeAddr','homeList', loc => { D.home = { ...loc }; });
+
+document.getElementById('fromHomeBtn').onclick = () => {
+  if(!D.home){ alert('Aseta kotiosoite ensin asetuksista'); return; }
+  document.getElementById('fromAddr').value = D.home.addr;
+  cur.from = D.home;
+};
+document.getElementById('fromGps').onclick = () => getGPS(l => {
+  document.getElementById('fromAddr').value = l.addr;
+  cur.from = l;
+});
+document.getElementById('toGps').onclick = () => getGPS(l => {
+  document.getElementById('toAddr').value = l.addr;
+  cur.to = l;
+});
+
+document.getElementById('calcBtn').onclick = async () => {
+  // Try geocode if we still don't have coords
+  const ft = document.getElementById('fromAddr').value.trim();
+  const tt = document.getElementById('toAddr').value.trim();
+  if(!cur.from && ft){
+    const r = await geocode(ft);
+    if(r.length) cur.from = { lat:+r[0].lat, lng:+r[0].lon, addr:r[0].display_name };
+  }
+  if(!cur.to && tt){
+    const r = await geocode(tt);
+    if(r.length) cur.to = { lat:+r[0].lat, lng:+r[0].lon, addr:r[0].display_name };
+  }
+  if(!cur.from || !cur.to){ sts('err','Syötä sekä lähtöpaikka että kohde'); return; }
+
+  const btn = document.getElementById('calcBtn');
+  btn.innerHTML = '<div class="spin"></div> Lasketaan...';
+  btn.disabled = true;
+  try{
+    const rt = await calcRoute(cur.from, cur.to);
+    cur.dist = rt.dist;
+    cur.geom = rt.geom;
+    const rt2 = document.getElementById('roundTrip').checked;
+    const km = rt2 ? rt.dist*2 : rt.dist;
+    sts('ok', `📍 ${km.toFixed(1)} km${rt2 ? ' (edestakainen)' : ''} · ~${rt.dur} min`);
+  } catch(e){ sts('err','Reittiä ei löytynyt. Tarkista osoitteet.'); }
+  btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="17" height="17"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg> Laske reitti`;
+  btn.disabled = false;
+};
+
+function sts(type, msg){
+  const el = document.getElementById('calcStatus');
+  el.className = `sts sts-${type}`;
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+document.getElementById('saveBtn').onclick = () => {
+  const ft = document.getElementById('fromAddr').value.trim();
+  const tt = document.getElementById('toAddr').value.trim();
+  const dt = document.getElementById('tripDate').value;
+  if(!ft||!tt||!dt){ alert('Täytä päivämäärä, lähtöpaikka ja kohde'); return; }
+  if(!cur.dist){ alert('Laske reitti ensin'); return; }
+  const rt2 = document.getElementById('roundTrip').checked;
+  const km = rt2 ? cur.dist*2 : cur.dist;
+  D.trips.push({
+    id: Date.now()+'', date:dt,
+    fromAddr: cur.from?.addr || ft, fromLat:cur.from?.lat, fromLng:cur.from?.lng,
+    toAddr:   cur.to?.addr   || tt, toLat:  cur.to?.lat,   toLng:  cur.to?.lng,
+    dist:km, oneway:cur.dist, rt:rt2, geom:cur.geom,
+    notes: document.getElementById('tripNotes').value.trim()
+  });
+  save();
+  switchView('vTrips');
+};
+
+// ── SETTINGS ───────────────────────────────────────────────
+document.getElementById('homeGpsBtn').onclick = () => getGPS(l => {
+  document.getElementById('homeAddr').value = l.addr;
+  D.home = l;
+});
+document.getElementById('saveHomeBtn').onclick = async () => {
+  const a = document.getElementById('homeAddr').value.trim();
+  if(!a){ alert('Syötä kotiosoite'); return; }
+  if(!D.home || D.home.addr !== a){
+    const r = await geocode(a);
+    if(r.length) D.home = { lat:+r[0].lat, lng:+r[0].lon, addr:r[0].display_name };
+    else D.home = { lat:null, lng:null, addr:a };
+  }
+  save();
+  document.getElementById('homeSaved').style.display = 'block';
+  setTimeout(() => document.getElementById('homeSaved').style.display='none', 2500);
+};
+document.getElementById('saveRateBtn').onclick = () => {
+  const v = parseFloat(document.getElementById('rateInp').value);
+  if(isNaN(v)||v<=0){ alert('Syötä kelvollinen arvo (esim. 0.26)'); return; }
+  D.rate = v; save();
+  alert(`Korvaus tallennettu: ${v.toFixed(2)} €/km`);
+};
+document.getElementById('csvBtn').onclick = exportCSV;
+document.getElementById('exportBtn').onclick = exportCSV;
+document.getElementById('clearBtn').onclick = () => {
+  if(!confirm('Poistetaanko kaikki matkat? Tätä ei voi peruuttaa.')) return;
+  D.trips = []; save(); renderTrips();
+};
+
+// ── TRIP LIST ──────────────────────────────────────────────
+let period = 'all';
+document.querySelectorAll('.fb').forEach(b => {
+  b.onclick = () => {
+    document.querySelectorAll('.fb').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    period = b.dataset.p;
+    renderTrips();
+  };
+});
+
+function inPeriod(trip){
+  const d = new Date(trip.date+'T12:00'), now = new Date();
+  if(period==='week'){ const w=new Date(now); w.setDate(now.getDate()-7); return d>=w; }
+  if(period==='month') return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear();
+  if(period==='year') return d.getFullYear()===now.getFullYear();
+  return true;
+}
+
+function fmtDate(s){
+  return new Date(s+'T12:00').toLocaleDateString('fi-FI',{day:'numeric',month:'short',year:'numeric'});
+}
+
+function renderTrips(){
+  const list = document.getElementById('tripList');
+  const trips = D.trips.filter(inPeriod).sort((a,b) => b.date.localeCompare(a.date));
+  const rate = D.rate || 0.26;
+  const totalKm = trips.reduce((s,t) => s+t.dist, 0);
+  const totalEur = totalKm * rate;
+  const now = new Date();
+  const mkm = D.trips.filter(t => {
+    const d=new Date(t.date+'T12:00');
+    return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear();
+  }).reduce((s,t) => s+t.dist, 0);
+
+  document.getElementById('totalKm').textContent = totalKm.toFixed(1)+' km';
+  document.getElementById('tripCount').textContent = `${trips.length} matkaa`;
+  document.getElementById('totalEur').textContent = totalEur.toFixed(2).replace('.',',')+' €';
+  document.getElementById('monthKm').textContent = mkm.toFixed(1)+' km';
+
+  if(!trips.length){
+    list.innerHTML = `<div class="empty">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <h3>Ei matkoja</h3>
+      <p>Lisää ensimmäinen matka + painikkeesta</p>
+    </div>`;
+    return;
+  }
+
+  list.innerHTML = trips.map(t => {
+    const fr = (t.fromAddr||'').split(',')[0];
+    const to = (t.toAddr||'').split(',')[0];
+    const eur = (t.dist * rate).toFixed(2).replace('.',',');
+    return `<div class="card" data-id="${t.id}">
+      <div class="ch">
+        <span class="td">${fmtDate(t.date)}</span>
+        ${t.rt ? '<span class="bdg">↔ Edestakainen</span>' : ''}
+      </div>
+      <div class="rt">${fr}<span class="arr">→</span>${to}</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:2px">
+        <span class="kms">📍 ${t.dist.toFixed(1)} km</span>
+        <span class="eur">= ${eur} €</span>
+      </div>
+      ${t.notes ? `<div class="nt">📝 ${t.notes}</div>` : ''}
+      <div class="acts">
+        <button class="ab map-btn" data-id="${t.id}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>
+          </svg>
+          Näytä kartalla
+        </button>
+        <button class="ab del del-btn" data-id="${t.id}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+          </svg>
+          Poista
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+
+  list.querySelectorAll('.map-btn').forEach(b => b.onclick = () => openMap(b.dataset.id));
+  list.querySelectorAll('.del-btn').forEach(b => b.onclick = () => delTrip(b.dataset.id));
+}
+
+function delTrip(id){
+  if(!confirm('Poistetaanko tämä matka?')) return;
+  D.trips = D.trips.filter(t => t.id !== id);
+  save(); renderTrips();
+}
+
+// ── MAP ────────────────────────────────────────────────────
+document.getElementById('closeMap').onclick = () => document.getElementById('mapModal').classList.remove('open');
+document.getElementById('mapModal').onclick = e => {
+  if(e.target === document.getElementById('mapModal')) document.getElementById('mapModal').classList.remove('open');
+};
+
+async function openMap(id){
+  const t = D.trips.find(x => x.id === id);
+  if(!t) return;
+  document.getElementById('mapModal').classList.add('open');
+  document.getElementById('mapTitle').textContent = `${(t.fromAddr||'').split(',')[0]} → ${(t.toAddr||'').split(',')[0]}`;
+
+  if(t.fromLat && t.toLat){
+    document.getElementById('gmLink').href =
+      `https://www.google.com/maps/dir/${t.fromLat},${t.fromLng}/${t.toLat},${t.toLng}`;
+  }
+
+  const rate = D.rate || 0.26;
+  document.getElementById('mapInfo').innerHTML = `
+    <strong>${t.dist.toFixed(1)} km</strong> ${t.rt?'(edestakainen)':''} &nbsp;·&nbsp;
+    📅 ${fmtDate(t.date)} &nbsp;·&nbsp;
+    💶 ${(t.dist*rate).toFixed(2).replace('.',',')} €
+    ${t.notes ? `<br>📝 ${t.notes}` : ''}
+  `;
+
+  await new Promise(r => setTimeout(r, 60));
+  if(!mapInst){
+    mapInst = L.map('map', { zoomControl:true });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution:'© <a href="https://openstreetmap.org">OpenStreetMap</a>'
+    }).addTo(mapInst);
+  } else {
+    mapInst.eachLayer(l => { if(l instanceof L.Marker || l instanceof L.Polyline) mapInst.removeLayer(l); });
+  }
+
+  if(t.fromLat && t.toLat){
+    const fm = [t.fromLat, t.fromLng], tm = [t.toLat, t.toLng];
+    L.marker(fm).addTo(mapInst).bindPopup((t.fromAddr||'').split(',')[0]);
+    L.marker(tm).addTo(mapInst).bindPopup((t.toAddr||'').split(',')[0]).openPopup();
+
+    if(t.geom && t.geom.length){
+      const poly = L.polyline(t.geom, { color:'#1a73e8', weight:4, opacity:.85 }).addTo(mapInst);
+      mapInst.fitBounds(poly.getBounds(), { padding:[20,20] });
+    } else {
+      const line = L.polyline([fm,tm], { color:'#1a73e8', weight:3, dashArray:'8,8' }).addTo(mapInst);
+      mapInst.fitBounds(line.getBounds(), { padding:[30,30] });
+      try{
+        const rt = await calcRoute({ lat:t.fromLat,lng:t.fromLng }, { lat:t.toLat,lng:t.toLng });
+        mapInst.removeLayer(line);
+        L.polyline(rt.geom, { color:'#1a73e8', weight:4, opacity:.85 }).addTo(mapInst);
+      } catch{}
+    }
+    mapInst.invalidateSize();
+  }
+}
+
+// ── EXPORT ─────────────────────────────────────────────────
+function exportCSV(){
+  const rate = D.rate || 0.26;
+  const rows = [['Päivämäärä','Lähtöpaikka','Kohde','Kilometrit','Edestakainen','Korvaus €','Muistiinpanot']];
+  [...D.trips].sort((a,b)=>a.date.localeCompare(b.date)).forEach(t => {
+    rows.push([t.date, t.fromAddr||'', t.toAddr||'', t.dist.toFixed(2), t.rt?'Kyllä':'Ei', (t.dist*rate).toFixed(2), t.notes||'']);
+  });
+  const tot = D.trips.reduce((s,t)=>s+t.dist,0);
+  rows.push(['YHTEENSÄ','','',tot.toFixed(2),'', (tot*rate).toFixed(2),'']);
+  const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(';')).join('\r\n');
+  const blob = new Blob(['﻿'+csv], { type:'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `matkat_${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+}
+
+// ── INIT ───────────────────────────────────────────────────
+(function(){
+  if(D.home) document.getElementById('homeAddr').value = D.home.addr || '';
+  document.getElementById('rateInp').value = D.rate || 0.26;
+  document.getElementById('tripDate').value = new Date().toISOString().split('T')[0];
+  if(D.home) document.getElementById('fromAddr').value = D.home.addr || '';
+  renderTrips();
+})();
+</script>
+</body>
+</html>
