@@ -117,6 +117,29 @@ input:checked+.tsl:before{transform:translateX(21px)}
 .mover{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:flex-end;justify-content:center}
 .mover.open{display:flex}
 .modal{background:#fff;width:100%;max-width:640px;border-radius:18px 18px 0 0;overflow:hidden;max-height:92vh;display:flex;flex-direction:column}
+
+/* DIALOG MODAL */
+.dlg-over{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:800;align-items:center;justify-content:center;padding:24px}
+.dlg-over.open{display:flex}
+.dlg{background:#fff;border-radius:18px;padding:24px;width:100%;max-width:340px;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.dlg-icon{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:22px}
+.dlg-icon.warn{background:#fef3c7}
+.dlg-icon.info{background:#dbeafe}
+.dlg-icon.err{background:#fee2e2}
+.dlg h3{font-size:17px;font-weight:700;text-align:center;margin-bottom:8px}
+.dlg p{font-size:14px;color:var(--muted);text-align:center;line-height:1.5;white-space:pre-line}
+.dlg-btns{display:flex;gap:8px;margin-top:20px}
+.dlg-btns button{flex:1;padding:12px;border-radius:10px;border:none;font-size:14px;font-weight:700;cursor:pointer}
+.dlg-ok{background:var(--primary);color:#fff}
+.dlg-ok.danger{background:var(--red)}
+.dlg-cancel{background:var(--bg);color:var(--text);border:1.5px solid var(--border)!important}
+
+/* MAP BOTTOM BANNER */
+.map-banner{position:absolute;bottom:0;left:0;right:0;background:rgba(255,255,255,.96);backdrop-filter:blur(8px);border-top:1px solid var(--border);padding:12px 16px;display:flex;gap:0;z-index:50}
+.map-stat{flex:1;text-align:center;border-right:1px solid var(--border)}
+.map-stat:last-child{border-right:none}
+.map-stat-val{font-size:18px;font-weight:800;color:var(--text)}
+.map-stat-lbl{font-size:11px;color:var(--muted);font-weight:600;margin-top:1px}
 .mhdr{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
 .mhdr h2{font-size:15px;font-weight:700;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #map{height:320px;flex-shrink:0}
@@ -183,6 +206,14 @@ input:checked+.tsl:before{transform:translateX(21px)}
         <div class="sum-lbl">Tämä kuukausi</div>
         <div class="sum-val" id="monthKm">0 km</div>
       </div>
+      <div class="sum-item">
+        <div class="sum-lbl">Työtunnit</div>
+        <div class="sum-val" id="totalHours">0 h</div>
+      </div>
+      <div class="sum-item">
+        <div class="sum-lbl">Tämä kk (h)</div>
+        <div class="sum-val" id="monthHours">0 h</div>
+      </div>
     </div>
   </div>
   <div class="filters">
@@ -245,6 +276,23 @@ input:checked+.tsl:before{transform:translateX(21px)}
         <span class="tsl"></span>
       </label>
       <span class="tgl-lbl">Edestakainen matka (km × 2)</span>
+    </div>
+    <div class="fg">
+      <label class="lbl">Työtunnit kohteessa</label>
+      <div class="irow">
+        <div style="flex:1">
+          <label style="font-size:11px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px">ALKAA</label>
+          <input type="time" class="inp" id="workStart" placeholder="07:00">
+        </div>
+        <div style="flex:1">
+          <label style="font-size:11px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px">PÄÄTTYY</label>
+          <input type="time" class="inp" id="workEnd" placeholder="15:00">
+        </div>
+        <div style="flex:1">
+          <label style="font-size:11px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px">TUNNIT</label>
+          <input type="number" class="inp" id="workHours" placeholder="0" step="0.5" min="0" style="text-align:center">
+        </div>
+      </div>
     </div>
     <div class="fg">
       <label class="lbl">Muistiinpanot</label>
@@ -323,8 +371,26 @@ input:checked+.tsl:before{transform:translateX(21px)}
 </div>
 
 <!-- VIEW: KARTTA -->
-<div id="vMap" class="view" style="padding:0">
+<div id="vMap" class="view" style="padding:0;position:relative">
   <div id="overviewMap" style="height:calc(100vh - 56px - 64px)"></div>
+  <div class="map-banner" id="mapBanner">
+    <div class="map-stat">
+      <div class="map-stat-val" id="mbTrips">0</div>
+      <div class="map-stat-lbl">Matkaa</div>
+    </div>
+    <div class="map-stat">
+      <div class="map-stat-val" id="mbKm">0 km</div>
+      <div class="map-stat-lbl">Kilometriä</div>
+    </div>
+    <div class="map-stat">
+      <div class="map-stat-val" id="mbPlaces">0</div>
+      <div class="map-stat-lbl">Kohdetta</div>
+    </div>
+    <div class="map-stat">
+      <div class="map-stat-val" id="mbEur">0 €</div>
+      <div class="map-stat-lbl">Korvaus</div>
+    </div>
+  </div>
 </div>
 
 <!-- BOTTOM NAV -->
@@ -362,6 +428,19 @@ input:checked+.tsl:before{transform:translateX(21px)}
     Asetukset
   </button>
 </nav>
+
+<!-- DIALOG MODAL -->
+<div class="dlg-over" id="dlgModal">
+  <div class="dlg">
+    <div class="dlg-icon warn" id="dlgIcon">⚠️</div>
+    <h3 id="dlgTitle">Huomio</h3>
+    <p id="dlgMsg"></p>
+    <div class="dlg-btns">
+      <button class="dlg-cancel" id="dlgCancelBtn" style="display:none">Peruuta</button>
+      <button class="dlg-ok" id="dlgOkBtn">OK</button>
+    </div>
+  </div>
+</div>
 
 <!-- QUICK GPS MODAL -->
 <div class="mover" id="quickModal">
@@ -413,6 +492,46 @@ input:checked+.tsl:before{transform:translateX(21px)}
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
+// ── DIALOG SYSTEM ──────────────────────────────────────────
+function showAlert(msg, title='Huomio', type='warn'){
+  const icons = {warn:'⚠️',info:'ℹ️',err:'❌',ok:'✅'};
+  document.getElementById('dlgIcon').textContent = icons[type]||'⚠️';
+  document.getElementById('dlgIcon').className = `dlg-icon ${type==='err'?'err':type==='ok'?'info':'warn'}`;
+  document.getElementById('dlgTitle').textContent = title;
+  document.getElementById('dlgMsg').textContent = msg;
+  document.getElementById('dlgCancelBtn').style.display = 'none';
+  document.getElementById('dlgOkBtn').className = 'dlg-ok';
+  document.getElementById('dlgOkBtn').textContent = 'OK';
+  document.getElementById('dlgModal').classList.add('open');
+  return new Promise(res => {
+    document.getElementById('dlgOkBtn').onclick = () => {
+      document.getElementById('dlgModal').classList.remove('open');
+      res();
+    };
+  });
+}
+function showConfirm(msg, title='Vahvista', danger=false){
+  document.getElementById('dlgIcon').textContent = danger ? '🗑️' : '❓';
+  document.getElementById('dlgIcon').className = `dlg-icon ${danger?'err':'warn'}`;
+  document.getElementById('dlgTitle').textContent = title;
+  document.getElementById('dlgMsg').textContent = msg;
+  document.getElementById('dlgCancelBtn').style.display = 'block';
+  document.getElementById('dlgCancelBtn').textContent = 'Peruuta';
+  document.getElementById('dlgOkBtn').className = danger ? 'dlg-ok danger' : 'dlg-ok';
+  document.getElementById('dlgOkBtn').textContent = danger ? 'Poista' : 'Vahvista';
+  document.getElementById('dlgModal').classList.add('open');
+  return new Promise(res => {
+    document.getElementById('dlgOkBtn').onclick = () => {
+      document.getElementById('dlgModal').classList.remove('open');
+      res(true);
+    };
+    document.getElementById('dlgCancelBtn').onclick = () => {
+      document.getElementById('dlgModal').classList.remove('open');
+      res(false);
+    };
+  });
+}
+
 // ── STATE ──────────────────────────────────────────────────
 let D = JSON.parse(localStorage.getItem('mpk') || '{"trips":[],"home":null,"rate":0.26}');
 function save(){ localStorage.setItem('mpk', JSON.stringify(D)); }
@@ -440,6 +559,17 @@ function switchView(id){
 // ── OVERVIEW MAP ───────────────────────────────────────────
 let ovMap = null, ovMarkers = [];
 function renderOverviewMap(){
+  // Update banner stats
+  const totalKm = D.trips.reduce((s,t)=>s+t.dist,0);
+  const totalEur = (totalKm*(D.rate||0.26));
+  const uniqPlaces = new Set(D.trips.filter(t=>t.toLat).map(t=>`${(+t.toLat).toFixed(3)},${(+t.toLng).toFixed(3)}`)).size;
+  document.getElementById('mbTrips').textContent = D.trips.length;
+  document.getElementById('mbKm').textContent = totalKm.toFixed(0)+' km';
+  document.getElementById('mbPlaces').textContent = uniqPlaces;
+  document.getElementById('mbEur').textContent = totalEur.toFixed(0)+' €';
+  // Adjust map height so banner doesn't overlap
+  document.getElementById('overviewMap').style.height = `calc(100vh - 56px - 64px - 64px)`;
+
   setTimeout(() => {
     if(!ovMap){
       ovMap = L.map('overviewMap').setView([64.5, 26], 5);
@@ -556,11 +686,11 @@ function gpsError(err){
   } else if(err && err.code === 3){
     msg = 'Sijainnin haku aikakatkaistiin. Yritä uudelleen.';
   }
-  alert(msg);
+  showAlert(msg, 'GPS-virhe', 'err');
 }
 
 function getGPS(cb){
-  if(!navigator.geolocation){ alert('GPS ei ole tuettu tässä selaimessa.'); return; }
+  if(!navigator.geolocation){ showAlert('GPS ei ole tuettu tässä selaimessa.','GPS','err'); return; }
   navigator.geolocation.getCurrentPosition(async pos => {
     const { latitude:lat, longitude:lng } = pos.coords;
     try{
@@ -586,23 +716,40 @@ async function calcRoute(from, to){
 }
 
 // ── ADD FORM ───────────────────────────────────────────────
+function calcWorkHours(){
+  const s = document.getElementById('workStart').value;
+  const e = document.getElementById('workEnd').value;
+  if(s && e){
+    const [sh,sm] = s.split(':').map(Number);
+    const [eh,em] = e.split(':').map(Number);
+    let mins = (eh*60+em)-(sh*60+sm);
+    if(mins < 0) mins += 24*60;
+    document.getElementById('workHours').value = (mins/60).toFixed(1).replace(/\.0$/,'');
+  }
+}
+
 function initForm(){
   document.getElementById('tripDate').value = new Date().toISOString().split('T')[0];
   cur = { from:D.home||null, to:null, dist:0, geom:null };
   document.getElementById('calcStatus').style.display = 'none';
   document.getElementById('toAddr').value = '';
   document.getElementById('tripNotes').value = '';
+  document.getElementById('workStart').value = '';
+  document.getElementById('workEnd').value = '';
+  document.getElementById('workHours').value = '';
   document.getElementById('roundTrip').checked = false;
   if(D.home) document.getElementById('fromAddr').value = D.home.addr;
   else document.getElementById('fromAddr').value = '';
 }
+document.getElementById('workStart').addEventListener('change', calcWorkHours);
+document.getElementById('workEnd').addEventListener('change', calcWorkHours);
 
 setupAC('fromAddr','fromList', loc => { cur.from = loc; });
 setupAC('toAddr',  'toList',  loc => { cur.to   = loc; });
 setupAC('homeAddr','homeList', loc => { D.home = { ...loc }; });
 
 document.getElementById('fromHomeBtn').onclick = () => {
-  if(!D.home){ alert('Aseta kotiosoite ensin asetuksista'); return; }
+  if(!D.home){ showAlert('Aseta kotiosoite ensin asetuksista.','Ei kotiosoitetta','warn'); return; }
   document.getElementById('fromAddr').value = D.home.addr;
   cur.from = D.home;
 };
@@ -627,7 +774,7 @@ document.getElementById('calcBtn').onclick = async () => {
     const r = await geocode(tt);
     if(r.length) cur.to = { lat:+r[0].lat, lng:+r[0].lon, addr:r[0].display_name };
   }
-  if(!cur.from || !cur.to){ sts('err','Syötä sekä lähtöpaikka että kohde'); return; }
+  if(!cur.from || !cur.to){ showAlert('Syötä sekä lähtöpaikka että kohde.','Puuttuvat tiedot'); return; }
 
   const btn = document.getElementById('calcBtn');
   btn.innerHTML = '<div class="spin"></div> Lasketaan...';
@@ -655,15 +802,19 @@ document.getElementById('saveBtn').onclick = () => {
   const ft = document.getElementById('fromAddr').value.trim();
   const tt = document.getElementById('toAddr').value.trim();
   const dt = document.getElementById('tripDate').value;
-  if(!ft||!tt||!dt){ alert('Täytä päivämäärä, lähtöpaikka ja kohde'); return; }
-  if(!cur.dist){ alert('Laske reitti ensin'); return; }
+  if(!ft||!tt||!dt){ showAlert('Täytä päivämäärä, lähtöpaikka ja kohde.','Puuttuvat tiedot'); return; }
+  if(!cur.dist){ showAlert('Laske reitti ensin painamalla "Laske reitti".','Ei reittiä','warn'); return; }
   const rt2 = document.getElementById('roundTrip').checked;
   const km = rt2 ? cur.dist*2 : cur.dist;
+  const hrs = parseFloat(document.getElementById('workHours').value)||0;
   D.trips.push({
     id: Date.now()+'', date:dt,
     fromAddr: cur.from?.addr || ft, fromLat:cur.from?.lat, fromLng:cur.from?.lng,
     toAddr:   cur.to?.addr   || tt, toLat:  cur.to?.lat,   toLng:  cur.to?.lng,
     dist:km, oneway:cur.dist, rt:rt2, geom:cur.geom,
+    hours: hrs,
+    workStart: document.getElementById('workStart').value,
+    workEnd: document.getElementById('workEnd').value,
     notes: document.getElementById('tripNotes').value.trim()
   });
   save();
@@ -677,7 +828,7 @@ document.getElementById('homeGpsBtn').onclick = () => getGPS(l => {
 });
 document.getElementById('saveHomeBtn').onclick = async () => {
   const a = document.getElementById('homeAddr').value.trim();
-  if(!a){ alert('Syötä kotiosoite'); return; }
+  if(!a){ showAlert('Syötä kotiosoite ensin.','Ei osoitetta'); return; }
   if(!D.home || D.home.addr !== a){
     const r = await geocode(a);
     if(r.length) D.home = { lat:+r[0].lat, lng:+r[0].lon, addr:r[0].display_name };
@@ -689,14 +840,15 @@ document.getElementById('saveHomeBtn').onclick = async () => {
 };
 document.getElementById('saveRateBtn').onclick = () => {
   const v = parseFloat(document.getElementById('rateInp').value);
-  if(isNaN(v)||v<=0){ alert('Syötä kelvollinen arvo (esim. 0.26)'); return; }
+  if(isNaN(v)||v<=0){ showAlert('Syötä kelvollinen arvo, esim. 0.26','Virheellinen arvo','err'); return; }
   D.rate = v; save();
-  alert(`Korvaus tallennettu: ${v.toFixed(2)} €/km`);
+  showAlert(`Korvaus tallennettu: ${v.toFixed(2)} €/km`,'Tallennettu','ok');
 };
 document.getElementById('csvBtn').onclick = exportCSV;
 document.getElementById('exportBtn').onclick = exportCSV;
-document.getElementById('clearBtn').onclick = () => {
-  if(!confirm('Poistetaanko kaikki matkat? Tätä ei voi peruuttaa.')) return;
+document.getElementById('clearBtn').onclick = async () => {
+  const ok = await showConfirm('Poistetaanko kaikki matkat? Tätä ei voi peruuttaa.','Poista kaikki matkat',true);
+  if(!ok) return;
   D.trips = []; save(); renderTrips();
 };
 
@@ -735,10 +887,14 @@ function renderTrips(){
     return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear();
   }).reduce((s,t) => s+t.dist, 0);
 
+  const totalHours = trips.reduce((s,t)=>s+(t.hours||0),0);
+  const monthHours = D.trips.filter(t=>{const d=new Date(t.date+'T12:00');return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();}).reduce((s,t)=>s+(t.hours||0),0);
   document.getElementById('totalKm').textContent = totalKm.toFixed(1)+' km';
   document.getElementById('tripCount').textContent = `${trips.length} matkaa`;
   document.getElementById('totalEur').textContent = totalEur.toFixed(2).replace('.',',')+' €';
   document.getElementById('monthKm').textContent = mkm.toFixed(1)+' km';
+  document.getElementById('totalHours').textContent = totalHours % 1 === 0 ? totalHours+' h' : totalHours.toFixed(1)+' h';
+  document.getElementById('monthHours').textContent = monthHours % 1 === 0 ? monthHours+' h' : monthHours.toFixed(1)+' h';
 
   if(!trips.length){
     list.innerHTML = `<div class="empty">
@@ -766,6 +922,7 @@ function renderTrips(){
         <span class="kms">📍 ${t.dist.toFixed(1)} km</span>
         <span class="eur">= ${eur} €</span>
       </div>
+      ${t.hours ? `<div class="nt">🕐 ${t.workStart&&t.workEnd ? `${t.workStart}–${t.workEnd} · ` : ''}${t.hours} h</div>` : ''}
       ${t.notes ? `<div class="nt">📝 ${t.notes}</div>` : ''}
       <div class="acts">
         <button class="ab map-btn" data-id="${t.id}">
@@ -789,8 +946,9 @@ function renderTrips(){
   list.querySelectorAll('.del-btn').forEach(b => b.onclick = () => delTrip(b.dataset.id));
 }
 
-function delTrip(id){
-  if(!confirm('Poistetaanko tämä matka?')) return;
+async function delTrip(id){
+  const ok = await showConfirm('Poistetaanko tämä matka?','Poista matka',true);
+  if(!ok) return;
   D.trips = D.trips.filter(t => t.id !== id);
   save(); renderTrips();
 }
@@ -854,12 +1012,13 @@ async function openMap(id){
 // ── EXPORT ─────────────────────────────────────────────────
 function exportCSV(){
   const rate = D.rate || 0.26;
-  const rows = [['Päivämäärä','Lähtöpaikka','Kohde','Kilometrit','Edestakainen','Korvaus €','Muistiinpanot']];
+  const rows = [['Päivämäärä','Lähtöpaikka','Kohde','Kilometrit','Edestakainen','Korvaus €','Alkaa','Päättyy','Tunnit','Muistiinpanot']];
   [...D.trips].sort((a,b)=>a.date.localeCompare(b.date)).forEach(t => {
-    rows.push([t.date, t.fromAddr||'', t.toAddr||'', t.dist.toFixed(2), t.rt?'Kyllä':'Ei', (t.dist*rate).toFixed(2), t.notes||'']);
+    rows.push([t.date, t.fromAddr||'', t.toAddr||'', t.dist.toFixed(2), t.rt?'Kyllä':'Ei', (t.dist*rate).toFixed(2), t.workStart||'', t.workEnd||'', t.hours||0, t.notes||'']);
   });
   const tot = D.trips.reduce((s,t)=>s+t.dist,0);
-  rows.push(['YHTEENSÄ','','',tot.toFixed(2),'', (tot*rate).toFixed(2),'']);
+  const totH = D.trips.reduce((s,t)=>s+(t.hours||0),0);
+  rows.push(['YHTEENSÄ','','',tot.toFixed(2),'', (tot*rate).toFixed(2),'','',totH,'']);
   const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(';')).join('\r\n');
   const blob = new Blob(['﻿'+csv], { type:'text/csv;charset=utf-8;' });
   const a = document.createElement('a');
@@ -911,7 +1070,7 @@ document.getElementById('quickModal').onclick = e => {
 };
 document.getElementById('qSave').onclick = async () => {
   if(!qLoc || !D.home){
-    if(!D.home) alert('Aseta kotiosoite ensin asetuksista');
+    if(!D.home) showAlert('Aseta kotiosoite ensin asetuksista.','Ei kotiosoitetta','warn');
     return;
   }
   const btn = document.getElementById('qSave');
