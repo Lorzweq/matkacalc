@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Matkapäiväkirja</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1a73e8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Matkakirja">
+<link rel="apple-touch-icon" href="icon.svg">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -151,6 +157,19 @@ input:checked+.tsl:before{transform:translateX(21px)}
 
 <!-- VIEW: MATKAT -->
 <div id="vTrips" class="view active">
+  <!-- Install banner -->
+  <div id="installBanner" style="display:none;background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:12px;padding:11px 13px;margin-bottom:12px;align-items:center;gap:10px">
+    <span style="flex:1;font-size:13px;font-weight:600">📱 Asenna sovellus puhelimeen</span>
+    <button id="installBtn" style="padding:7px 13px;background:var(--primary);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer">Asenna</button>
+    <button id="dismissInstall" style="padding:6px;background:none;border:none;cursor:pointer;color:var(--muted);font-size:16px;line-height:1">✕</button>
+  </div>
+  <!-- Quick GPS add -->
+  <button id="quickGpsBtn" style="width:100%;padding:11px;border-radius:12px;border:1.5px dashed #93c5fd;background:#eff6ff;color:var(--primary);font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:12px">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+      <circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/>
+    </svg>
+    Kirjaa nykyinen sijainti kohteeksi
+  </button>
   <div class="sum">
     <div class="sum-title">Kilometrit yhteensä</div>
     <div class="sum-km" id="totalKm">0 km</div>
@@ -303,6 +322,11 @@ input:checked+.tsl:before{transform:translateX(21px)}
   </div>
 </div>
 
+<!-- VIEW: KARTTA -->
+<div id="vMap" class="view" style="padding:0">
+  <div id="overviewMap" style="height:calc(100vh - 56px - 64px)"></div>
+</div>
+
 <!-- BOTTOM NAV -->
 <nav class="nav">
   <button class="ni active" data-v="vTrips">
@@ -322,6 +346,14 @@ input:checked+.tsl:before{transform:translateX(21px)}
     </svg>
     Lisää
   </button>
+  <button class="ni" data-v="vMap">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/>
+      <line x1="8" y1="2" x2="8" y2="18"/>
+      <line x1="16" y1="6" x2="16" y2="22"/>
+    </svg>
+    Kartta
+  </button>
   <button class="ni" data-v="vSettings">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <circle cx="12" cy="12" r="3"/>
@@ -330,6 +362,31 @@ input:checked+.tsl:before{transform:translateX(21px)}
     Asetukset
   </button>
 </nav>
+
+<!-- QUICK GPS MODAL -->
+<div class="mover" id="quickModal">
+  <div class="modal" style="border-radius:18px 18px 0 0;padding:20px">
+    <h2 style="font-size:16px;font-weight:700;margin-bottom:4px">📍 Kirjaa nykyinen sijainti</h2>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Täytä tiedot ja tallenna matka suoraan.</p>
+    <div class="fg">
+      <label class="lbl">Päivämäärä</label>
+      <input type="date" class="inp" id="qDate">
+    </div>
+    <div class="fg">
+      <label class="lbl">Kohde (haetaan GPS:stä)</label>
+      <input type="text" class="inp" id="qDest" placeholder="Haetaan..." readonly style="background:#f9fafb">
+    </div>
+    <div class="fg">
+      <label class="lbl">Muistiinpanot</label>
+      <input type="text" class="inp" id="qNotes" placeholder="Projekti, asiakas tms.">
+    </div>
+    <div id="qStatus" style="display:none;margin-bottom:10px"></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-s" id="qCancel" style="flex:1">Peruuta</button>
+      <button class="btn btn-p" id="qSave" style="flex:2" disabled>Tallenna</button>
+    </div>
+  </div>
+</div>
 
 <!-- MAP MODAL -->
 <div class="mover" id="mapModal">
@@ -364,12 +421,12 @@ let mapInst = null;
 let cur = { from:null, to:null, dist:0, geom:null };
 
 // ── NAVIGATION ─────────────────────────────────────────────
-const vtitles = { vTrips:'Matkat', vAdd:'Lisää matka', vSettings:'Asetukset' };
+const vtitles = { vTrips:'Matkat', vAdd:'Lisää matka', vMap:'Kartta', vSettings:'Asetukset' };
 document.querySelectorAll('.ni').forEach(btn => {
   btn.addEventListener('click', () => switchView(btn.dataset.v));
 });
 function switchView(id){
-  ['vTrips','vAdd','vSettings'].forEach(v => {
+  ['vTrips','vAdd','vMap','vSettings'].forEach(v => {
     document.getElementById(v).classList.toggle('active', v === id);
   });
   document.querySelectorAll('.ni').forEach(b => b.classList.toggle('active', b.dataset.v === id));
@@ -377,6 +434,66 @@ function switchView(id){
   document.getElementById('exportBtn').style.display = id === 'vTrips' ? 'flex' : 'none';
   if(id === 'vTrips') renderTrips();
   if(id === 'vAdd') initForm();
+  if(id === 'vMap') renderOverviewMap();
+}
+
+// ── OVERVIEW MAP ───────────────────────────────────────────
+let ovMap = null, ovMarkers = [];
+function renderOverviewMap(){
+  setTimeout(() => {
+    if(!ovMap){
+      ovMap = L.map('overviewMap').setView([64.5, 26], 5);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution:'© <a href="https://openstreetmap.org">OpenStreetMap</a>'
+      }).addTo(ovMap);
+    }
+    // Clear old markers
+    ovMarkers.forEach(m => ovMap.removeLayer(m));
+    ovMarkers = [];
+
+    const trips = D.trips.filter(t => t.toLat && t.toLng);
+    if(!trips.length){
+      ovMap.setView([64.5, 26], 5);
+      return;
+    }
+
+    // Group by destination coords (cluster same place)
+    const groups = {};
+    trips.forEach(t => {
+      const key = `${(+t.toLat).toFixed(3)},${(+t.toLng).toFixed(3)}`;
+      if(!groups[key]) groups[key] = { lat:+t.toLat, lng:+t.toLng, addr:(t.toAddr||'').split(',')[0], trips:[] };
+      groups[key].trips.push(t);
+    });
+
+    const bounds = [];
+    Object.values(groups).forEach(g => {
+      const count = g.trips.length;
+      const totalKm = g.trips.reduce((s,t)=>s+t.dist,0);
+      const dates = g.trips.map(t => fmtDate(t.date)).join('<br>');
+      const color = count >= 5 ? '#dc2626' : count >= 3 ? '#f59e0b' : '#1a73e8';
+
+      // Custom icon with visit count
+      const icon = L.divIcon({
+        className:'',
+        html:`<div style="background:${color};color:#fff;width:${count>1?34:28}px;height:${count>1?34:28}px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:${count>1?13:11}px;font-weight:700;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3)">${count>1?count:'📍'}</div>`,
+        iconSize:[count>1?34:28, count>1?34:28],
+        iconAnchor:[count>1?17:14, count>1?34:28]
+      });
+
+      const marker = L.marker([g.lat, g.lng], {icon}).addTo(ovMap);
+      marker.bindPopup(`
+        <b>${g.addr}</b><br>
+        🔁 ${count} käyntiä · ${totalKm.toFixed(0)} km yhteensä<br>
+        <small style="color:#666">${dates}</small>
+      `, { maxWidth:220 });
+      ovMarkers.push(marker);
+      bounds.push([g.lat, g.lng]);
+    });
+
+    if(bounds.length === 1) ovMap.setView(bounds[0], 12);
+    else ovMap.fitBounds(bounds, { padding:[30,30] });
+    ovMap.invalidateSize();
+  }, 60);
 }
 
 // ── GEOCODING (Nominatim, Finland-biased) ──────────────────
@@ -749,6 +866,83 @@ function exportCSV(){
   a.href = URL.createObjectURL(blob);
   a.download = `matkat_${new Date().toISOString().split('T')[0]}.csv`;
   a.click();
+}
+
+// ── PWA INSTALL ────────────────────────────────────────────
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('installBanner').style.display = 'flex';
+});
+document.getElementById('installBtn').onclick = async () => {
+  if(!deferredPrompt) return;
+  deferredPrompt.prompt();
+  await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  document.getElementById('installBanner').style.display = 'none';
+};
+document.getElementById('dismissInstall').onclick = () => {
+  document.getElementById('installBanner').style.display = 'none';
+};
+window.addEventListener('appinstalled', () => {
+  document.getElementById('installBanner').style.display = 'none';
+});
+
+// ── QUICK GPS ADD ──────────────────────────────────────────
+let qLoc = null;
+document.getElementById('quickGpsBtn').onclick = () => {
+  qLoc = null;
+  document.getElementById('qDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('qDest').value = 'Haetaan sijaintia...';
+  document.getElementById('qNotes').value = '';
+  document.getElementById('qSave').disabled = true;
+  document.getElementById('qStatus').style.display = 'none';
+  document.getElementById('quickModal').classList.add('open');
+  getGPS(loc => {
+    qLoc = loc;
+    document.getElementById('qDest').value = loc.addr;
+    document.getElementById('qSave').disabled = false;
+  });
+};
+document.getElementById('qCancel').onclick = () => document.getElementById('quickModal').classList.remove('open');
+document.getElementById('quickModal').onclick = e => {
+  if(e.target === document.getElementById('quickModal')) document.getElementById('quickModal').classList.remove('open');
+};
+document.getElementById('qSave').onclick = async () => {
+  if(!qLoc || !D.home){
+    if(!D.home) alert('Aseta kotiosoite ensin asetuksista');
+    return;
+  }
+  const btn = document.getElementById('qSave');
+  btn.textContent = 'Lasketaan...';
+  btn.disabled = true;
+  try{
+    const rt = await calcRoute(D.home, qLoc);
+    D.trips.push({
+      id: Date.now()+'',
+      date: document.getElementById('qDate').value,
+      fromAddr: D.home.addr, fromLat: D.home.lat, fromLng: D.home.lng,
+      toAddr: qLoc.addr, toLat: qLoc.lat, toLng: qLoc.lng,
+      dist: rt.dist, oneway: rt.dist, rt: false, geom: rt.geom,
+      notes: document.getElementById('qNotes').value.trim()
+    });
+    save();
+    document.getElementById('quickModal').classList.remove('open');
+    renderTrips();
+  } catch(e){
+    const s = document.getElementById('qStatus');
+    s.className = 'sts sts-err'; s.textContent = 'Reittiä ei löydy. Tarkista kotiosoite asetuksista.'; s.style.display='block';
+  }
+  btn.textContent = 'Tallenna';
+  btn.disabled = false;
+};
+
+// ── SERVICE WORKER ─────────────────────────────────────────
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
 }
 
 // ── INIT ───────────────────────────────────────────────────
